@@ -6,29 +6,31 @@ import com.neosoft.user.service.entity.Hotel;
 import com.neosoft.user.service.entity.Rating;
 import com.neosoft.user.service.entity.User;
 import com.neosoft.user.service.external.service.HotelService;
+import com.neosoft.user.service.external.service.RatingService;
 import com.neosoft.user.service.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+//import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+
 
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
-    @Autowired
-    RestTemplate restTemplate;
+//    @Autowired
+//    RestTemplate restTemplate;
     @Autowired
     HotelService hotelService;
 
-    private Logger logger= LoggerFactory.getLogger(UserServiceImpl.class);
+    @Autowired
+    RatingService ratingService;
+
+    //private Logger logger= LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public User saveUser(User user) {
@@ -42,8 +44,9 @@ public class UserServiceImpl implements UserService {
         List<User> userList=userRepository.findAll();
         for(User user: userList){
             String id=user.getUserId();
-            Rating[] ratingArray=restTemplate.getForObject("http://localhost:8082/ratings/users/"+id, Rating[].class);
-            List<Rating> ratingList=Arrays.stream(ratingArray).toList();
+           // Rating[] ratingArray=restTemplate.getForObject("http://localhost:8082/ratings/users/"+id, Rating[].class);
+          //  List<Rating> ratingList=Arrays.stream(ratingArray).toList();
+            List<Rating> ratingList= ratingService.get(id);
             for(Rating rating:ratingList){
                 //Hotel hotel = restTemplate.getForObject("http://localhost:8081/hotels/"+rating.getHotelId(), Hotel.class);
                 Hotel hotel=hotelService.getHotel(rating.getHotelId());
@@ -57,15 +60,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(String userId) {
         User user= userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User Not Found"));
-        Rating[] ratingArray= restTemplate.getForObject("http://localhost:8082/ratings/users/"+user.getUserId(), Rating[].class
-        );
-        // logger.info("{}",ratingList);
-        List<Rating> ratingList=Arrays.stream(ratingArray).toList();
+//       Rating[] ratingArray= restTemplate.getForObject("http://localhost:8082/ratings/users/"+user.getUserId(), Rating[].class);
+//        logger.info("{}",ratingList);
+//         List<Rating> ratingList=Arrays.stream(ratingArray).toList();
 //        List<Rating> ratingAllList=ratingList.stream().map(rating -> {
 //                    Hotel hotel = restTemplate.getForObject("http://localhost:8081/hotels/"+rating.getHotelId(), Hotel.class);
 //                    rating.setHotel(hotel);
 //                    return rating;
 //                }).collect(Collectors.toList());
+        List<Rating> ratingList=ratingService.get(user.getUserId());
         for(Rating rating:ratingList){
            // Hotel hotel = restTemplate.getForObject("http://localhost:8081/hotels/"+rating.getHotelId(), Hotel.class);
            Hotel hotel=hotelService.getHotel(rating.getHotelId());
